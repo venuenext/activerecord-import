@@ -710,8 +710,13 @@ class ActiveRecord::Base
 
           # be sure to query sequence_name *last*, only if cheaper tests fail, because it's costly
           if val.nil? && column.name == primary_key && !sequence_name.blank?
-            connection_memo.next_value_for_sequence(sequence_name)
+            xx = connection_memo.next_value_for_sequence(sequence_name)
+            Rollbar.debug "sequence was found", sequence_name: sequence_name, value: xx
+            xx
           elsif column
+            if val.nil? && column.name == primary_key
+              Rollbar.debug "sequence was not found"
+            end
             if respond_to?(:type_caster)                                         # Rails 5.0 and higher
               type = type_for_attribute(column.name)
               val = type.type == :boolean ? type.cast(val) : type.serialize(val)
